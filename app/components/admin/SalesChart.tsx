@@ -107,6 +107,30 @@ export const multiAxisOptions = {
     },
 };
 
-export default function SalesChart() {
-    return <Line options={multiAxisOptions} data={data} />;
+export default function SalesChart({ data }: { data?: any }) {
+    const chartData = {
+        labels: data?.labels || [],
+        datasets: [
+            {
+                label: 'Revenue',
+                data: data?.revenue || [],
+                borderColor: '#0f766e',
+                backgroundColor: 'rgba(15, 118, 110, 0.1)',
+                fill: true,
+                tension: 0.4,
+                yAxisID: 'y',
+            },
+            {
+                label: 'Orders',
+                data: data?.orders || [],
+                borderColor: '#d4af37',
+                backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                fill: true,
+                tension: 0.4,
+                yAxisID: 'y1',
+            },
+        ],
+    };
+
+    return <Line options={multiAxisOptions} data={chartData} />;
 }

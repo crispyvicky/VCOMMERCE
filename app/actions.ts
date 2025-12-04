@@ -87,11 +87,20 @@ export async function createOrder(orderData: any) {
     }
 }
 
+import { revalidatePath } from 'next/cache';
+
 export async function createProduct(productData: any) {
     await dbConnect();
 
     try {
         const product = await Product.create(productData);
+
+        // Revalidate all product listing pages
+        revalidatePath('/');
+        revalidatePath('/accessories');
+        revalidatePath('/new-arrivals');
+        revalidatePath('/admin/products');
+
         return { success: true, productId: (product as any)._id.toString() };
     } catch (error) {
         console.error('Error creating product:', error);
@@ -202,4 +211,106 @@ export async function getUserOrders(email: string) {
         createdAt: order.createdAt?.toISOString(),
         items: order.items
     }));
+}
+
+export async function deleteProduct(productId: string) {
+    await dbConnect();
+    try {
+        await Product.findByIdAndDelete(productId);
+        revalidatePath('/');
+        revalidatePath('/accessories');
+        revalidatePath('/new-arrivals');
+        revalidatePath('/admin/products');
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        return { success: false, error: 'Failed to delete product' };
+    }
+}
+
+export async function updateProduct(productId: string, productData: any) {
+    await dbConnect();
+    try {
+        await Product.findByIdAndUpdate(productId, productData);
+        revalidatePath('/');
+        revalidatePath('/accessories');
+        revalidatePath('/new-arrivals');
+        revalidatePath('/admin/products');
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating product:', error);
+        return { success: false, error: 'Failed to update product' };
+    }
+}
+
+export async function getDashboardStats() {
+    await dbConnect();
+
+    // 1. Total Revenue & Orders (Aggregation)
+    const revenueStats = await Order.aggregate([
+        {
+            $group: {
+                _id: null,
+                totalRevenue: { $sum: "$total" },
+                totalOrders: { $sum: 1 }
+            }
+        }
+    ]);
+
+    const totalRevenue = revenueStats[0]?.totalRevenue || 0;
+    const totalOrders = revenueStats[0]?.totalOrders || 0;
+
+    // 2. Total Customers (Distinct Emails)
+    const uniqueCustomers = (await Order.distinct('customer.email')).length;
+
+    // 3. Low Stock Products
+    const lowStockCount = await Product.countDocuments({ inStock: true });
+
+    // 4. Recent Orders
+    const recentOrders = await Order.find({})
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean()
+        .then(orders => orders.map((order: any) => ({
+            id: order._id.toString(),
+            customer: order.customer.name,
+            date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A',
+            total: `$${order.total.toFixed(2)}`,
+            status: order.status
+        })));
+
+    // 5. Monthly Sales (Last 6 Months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+
+    const monthlySales = await Order.aggregate([
+        { $match: { createdAt: { $gte: sixMonthsAgo } } },
+        {
+            $group: {
+                _id: { $month: "$createdAt" },
+                revenue: { $sum: "$total" },
+                orders: { $sum: 1 }
+            }
+        },
+        { $sort: { "_id": 1 } }
+    ]);
+
+    // Map month numbers to names
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const chartData = {
+        labels: monthlySales.map(m => monthNames[m._id - 1]),
+        revenue: monthlySales.map(m => m.revenue),
+        orders: monthlySales.map(m => m.orders)
+    };
+
+    return {
+        metrics: {
+            revenue: totalRevenue,
+            orders: totalOrders,
+            customers: uniqueCustomers,
+            lowStock: lowStockCount
+        },
+        recentOrders,
+        chartData
+    };
 }

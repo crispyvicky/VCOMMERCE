@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { getProducts } from '@/app/actions';
 import Image from 'next/image';
+import ProductActions from '@/app/components/admin/ProductActions';
+
+export const dynamic = 'force-dynamic';
 
 export default async function ProductsPage() {
     const products = await getProducts({ limit: 50 });
@@ -69,14 +72,7 @@ export default async function ProductsPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button className="p-1 text-gray-400 hover:text-[var(--primary)] transition-colors">
-                                                <Edit size={18} />
-                                            </button>
-                                            <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
+                                        <ProductActions productId={product._id} />
                                     </td>
                                 </tr>
                             ))}

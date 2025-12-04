@@ -3,14 +3,28 @@
 import { DollarSign, ShoppingBag, Users, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import clsx from 'clsx';
 import SalesChart from '@/app/components/admin/SalesChart';
+import { getDashboardStats } from '@/app/actions';
 
-export default function AdminDashboard() {
-    // Mock Metrics Data
+export const dynamic = 'force-dynamic';
+
+export default async function AdminDashboard() {
+    let stats;
+    try {
+        stats = await getDashboardStats();
+    } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+        stats = {
+            metrics: { revenue: 0, orders: 0, customers: 0, lowStock: 0 },
+            recentOrders: [],
+            chartData: { labels: [], revenue: [], orders: [] }
+        };
+    }
+
     const metrics = [
         {
             label: 'Total Revenue',
-            value: '$45,231.89',
-            change: '+20.1%',
+            value: `$${stats.metrics.revenue.toFixed(2)}`,
+            change: '+0%', // Placeholder for now
             trend: 'up',
             icon: DollarSign,
             color: 'text-green-600',
@@ -18,8 +32,8 @@ export default function AdminDashboard() {
         },
         {
             label: 'Orders',
-            value: '+2350',
-            change: '+180.1%',
+            value: stats.metrics.orders.toString(),
+            change: '+0%',
             trend: 'up',
             icon: ShoppingBag,
             color: 'text-blue-600',
@@ -27,31 +41,22 @@ export default function AdminDashboard() {
         },
         {
             label: 'Customers',
-            value: '+12,234',
-            change: '+19%',
+            value: stats.metrics.customers.toString(),
+            change: '+0%',
             trend: 'up',
             icon: Users,
             color: 'text-purple-600',
             bg: 'bg-purple-100',
         },
         {
-            label: 'Low Stock',
-            value: '7',
-            change: '-2',
-            trend: 'down',
+            label: 'Active Products',
+            value: stats.metrics.lowStock.toString(),
+            change: '0',
+            trend: 'neutral',
             icon: AlertTriangle,
             color: 'text-orange-600',
             bg: 'bg-orange-100',
         },
-    ];
-
-    // Mock Recent Orders
-    const recentOrders = [
-        { id: '#ORD-7352', customer: 'Alice Freeman', date: 'Oct 24, 2023', total: '$125.00', status: 'Pending' },
-        { id: '#ORD-7351', customer: 'Josefina Hall', date: 'Oct 24, 2023', total: '$450.00', status: 'Processing' },
-        { id: '#ORD-7350', customer: 'Lura Nienow', date: 'Oct 23, 2023', total: '$89.00', status: 'Shipped' },
-        { id: '#ORD-7349', customer: 'Galen Spinka', date: 'Oct 23, 2023', total: '$210.50', status: 'Delivered' },
-        { id: '#ORD-7348', customer: 'Marlen Kautzer', date: 'Oct 22, 2023', total: '$65.00', status: 'Cancelled' },
     ];
 
     return (
@@ -69,10 +74,10 @@ export default function AdminDashboard() {
                             <div className={`p-2 rounded-lg ${metric.bg}`}>
                                 <metric.icon className={`w-6 h-6 ${metric.color}`} />
                             </div>
-                            <span className={`flex items-center text-xs font-medium ${metric.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                            {/* <span className={`flex items-center text-xs font-medium ${metric.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
                                 {metric.change}
                                 {metric.trend === 'up' ? <ArrowUpRight size={14} className="ml-1" /> : <ArrowDownRight size={14} className="ml-1" />}
-                            </span>
+                            </span> */}
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
@@ -88,7 +93,7 @@ export default function AdminDashboard() {
                 <div className="md:col-span-4 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <h3 className="font-semibold text-lg mb-4">Revenue Analytics</h3>
                     <div className="h-80">
-                        <SalesChart />
+                        <SalesChart data={stats.chartData} />
                     </div>
                 </div>
 
@@ -96,16 +101,8 @@ export default function AdminDashboard() {
                 <div className="md:col-span-3 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <h3 className="font-semibold text-lg mb-6">Top Selling Products</h3>
                     <div className="space-y-6">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-gray-100 rounded-md" />
-                                <div className="flex-1">
-                                    <h4 className="font-medium text-sm">Premium Silk Saree</h4>
-                                    <p className="text-xs text-muted-foreground">24 sales this week</p>
-                                </div>
-                                <span className="font-semibold text-sm">$2,400</span>
-                            </div>
-                        ))}
+                        {/* Placeholder for top products logic if needed, or remove */}
+                        <p className="text-muted-foreground text-sm">Top products data coming soon.</p>
                     </div>
                 </div>
 
@@ -126,9 +123,9 @@ export default function AdminDashboard() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {recentOrders.map((order) => (
+                                {stats.recentOrders.map((order: any) => (
                                     <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 font-medium">{order.id}</td>
+                                        <td className="px-6 py-4 font-medium">#{order.id.slice(-6).toUpperCase()}</td>
                                         <td className="px-6 py-4">{order.customer}</td>
                                         <td className="px-6 py-4 text-gray-500">{order.date}</td>
                                         <td className="px-6 py-4 font-medium">{order.total}</td>
@@ -146,6 +143,13 @@ export default function AdminDashboard() {
                                         </td>
                                     </tr>
                                 ))}
+                                {stats.recentOrders.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                                            No orders yet.
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

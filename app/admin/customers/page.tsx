@@ -1,6 +1,8 @@
 import { Search, Mail, MapPin } from 'lucide-react';
 import { getCustomers } from '@/app/actions';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CustomersPage() {
     const customers = await getCustomers();
 
@@ -49,7 +51,7 @@ export default async function CustomersPage() {
                                     <td className="px-6 py-4 text-gray-500">
                                         <div className="flex items-center gap-1">
                                             <MapPin size={14} />
-                                            {customer.city}, {customer.country}
+                                            {customer.city || 'N/A'}, {customer.country || 'N/A'}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 font-medium">
@@ -59,7 +61,7 @@ export default async function CustomersPage() {
                                         ${customer.totalSpent.toFixed(2)}
                                     </td>
                                     <td className="px-6 py-4 text-gray-500">
-                                        {new Date(customer.lastOrderDate).toLocaleDateString()}
+                                        {customer.lastOrderDate ? new Date(customer.lastOrderDate).toLocaleDateString() : 'N/A'}
                                     </td>
                                 </tr>
                             ))}

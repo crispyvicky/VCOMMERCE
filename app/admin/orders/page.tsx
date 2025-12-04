@@ -3,6 +3,8 @@ import { Search, Eye } from 'lucide-react';
 import { getOrders } from '@/app/actions';
 import clsx from 'clsx';
 
+export const dynamic = 'force-dynamic';
+
 export default async function OrdersPage() {
     const orders = await getOrders();
 

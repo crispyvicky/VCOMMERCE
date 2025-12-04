@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-const categories = ['All', 'Men', 'Women', 'Sarees', 'Accessories'];
+import { CATEGORIES } from '@/lib/constants';
+
+const categories = ['All', ...CATEGORIES];
 const priceRanges = [
     { label: 'All Prices', min: 0, max: 10000 },
     { label: 'Under $100', min: 0, max: 100 },
@@ -75,8 +77,8 @@ export default function FilterSidebar() {
                                 <button
                                     onClick={() => updateFilter('category', cat)}
                                     className={`text-sm transition-colors ${currentCategory === cat
-                                            ? 'text-[var(--primary)] font-medium'
-                                            : 'text-muted-foreground hover:text-foreground'
+                                        ? 'text-[var(--primary)] font-medium'
+                                        : 'text-muted-foreground hover:text-foreground'
                                         }`}
                                 >
                                     {cat}
@@ -108,8 +110,8 @@ export default function FilterSidebar() {
                                 <button
                                     onClick={() => handlePriceChange(range.min, range.max)}
                                     className={`text-sm transition-colors ${currentMinPrice === range.min.toString()
-                                            ? 'text-[var(--primary)] font-medium'
-                                            : 'text-muted-foreground hover:text-foreground'
+                                        ? 'text-[var(--primary)] font-medium'
+                                        : 'text-muted-foreground hover:text-foreground'
                                         }`}
                                 >
                                     {range.label}

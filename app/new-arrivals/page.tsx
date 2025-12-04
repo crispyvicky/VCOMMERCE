@@ -3,6 +3,8 @@ import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../actions';
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewArrivalsPage() {
     const products = (await getProducts({ limit: 12 })) || [];
 
