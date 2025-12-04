@@ -8,12 +8,23 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   // Fetch featured products from MongoDB
-  const featuredProducts = await getProducts({ limit: 4, isFeatured: true });
+  let featuredProducts: any[] = [];
+  try {
+    featuredProducts = await getProducts({ limit: 4, isFeatured: true });
+  } catch (error) {
+    console.warn('Failed to fetch featured products:', error);
+  }
 
   // If no featured products, fallback to latest 4
-  const productsToShow = featuredProducts.length > 0
-    ? featuredProducts
-    : await getProducts({ limit: 4 });
+  let productsToShow = featuredProducts;
+  if (productsToShow.length === 0) {
+    try {
+      productsToShow = await getProducts({ limit: 4 });
+    } catch (error) {
+      console.warn('Failed to fetch fallback products:', error);
+      productsToShow = [];
+    }
+  }
 
   return (
     <main className="min-h-screen flex flex-col">

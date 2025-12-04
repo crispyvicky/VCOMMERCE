@@ -10,7 +10,12 @@ import { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
-    const product = await getProduct(id);
+    let product = null;
+    try {
+        product = await getProduct(id);
+    } catch (error) {
+        console.warn(`Failed to fetch product metadata for ${id}:`, error);
+    }
 
     if (!product) {
         return {
@@ -31,14 +36,31 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const product = await getProduct(id);
-    const reviews = await getProductReviews(id);
+    let product = null;
+    let reviews: any[] = [];
+
+    try {
+        product = await getProduct(id);
+    } catch (error) {
+        console.warn(`Failed to fetch product ${id}:`, error);
+    }
+
+    try {
+        reviews = await getProductReviews(id);
+    } catch (error) {
+        console.warn(`Failed to fetch reviews for ${id}:`, error);
+    }
 
     if (!product) {
         notFound();
     }
 
-    const relatedProducts = await getRelatedProducts(id, product.category);
+    let relatedProducts: any[] = [];
+    try {
+        relatedProducts = await getRelatedProducts(id, product.category);
+    } catch (error) {
+        console.warn(`Failed to fetch related products for ${id}:`, error);
+    }
 
     const jsonLd = {
         '@context': 'https://schema.org',
