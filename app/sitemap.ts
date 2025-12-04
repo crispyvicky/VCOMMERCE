@@ -2,14 +2,19 @@ import { MetadataRoute } from 'next';
 import { getProducts } from '@/app/actions';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const products = await getProducts({});
+    let productEntries: MetadataRoute.Sitemap = [];
 
-    const productEntries = products.map((product: any) => ({
-        url: `https://vasthra.com/product/${product._id}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: 0.8,
-    }));
+    try {
+        const products = await getProducts({});
+        productEntries = products.map((product: any) => ({
+            url: `https://vasthra.com/product/${product._id}`,
+            lastModified: new Date(),
+            changeFrequency: 'daily' as const,
+            priority: 0.8,
+        }));
+    } catch (error) {
+        console.warn('Failed to fetch products for sitemap, generating basic sitemap only:', error);
+    }
 
     return [
         {
