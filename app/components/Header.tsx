@@ -27,13 +27,13 @@ export default function Header() {
   return (
     <header
       className={clsx(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        isScrolled ? 'glass py-4' : 'bg-transparent py-6'
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white border-b border-gray-100',
+        isScrolled ? 'shadow-sm py-3' : 'py-4'
       )}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold tracking-tighter">
-          <span className="text-gold-gradient">VASTHRA</span>
+        <Link href="/" className="text-2xl font-bold tracking-tighter text-black">
+          VASTHRA
         </Link>
 
         <nav className="hidden md:flex items-center space-x-8">

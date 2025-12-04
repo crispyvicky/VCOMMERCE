@@ -2,33 +2,26 @@
 
 :root {
   --background: #ffffff;
-  /* White */
-  --foreground: #171717;
-  /* Neutral-900 */
+  --foreground: #111111; /* Near Black */
 
-  --primary: #0f766e;
-  /* Deep Teal - Accent */
-  --primary-foreground: #ffffff;
+  --primary: #FACC15; /* Innovist Yellow */
+  --primary-foreground: #000000;
 
   --secondary: #f5f5f5;
-  /* Neutral-100 */
-  --secondary-foreground: #171717;
+  --secondary-foreground: #111111;
 
-  --accent: #0f766e;
-  /* Deep Teal */
-  --accent-foreground: #ffffff;
+  --accent: #E7FAF2; /* Innovist Sale Green */
+  --accent-foreground: #111111;
 
   --muted: #f5f5f5;
-  /* Neutral-100 */
-  --muted-foreground: #737373;
-  /* Neutral-500 */
+  --muted-foreground: #666666;
 
-  --cta: #111827;
-  /* Black - CTA */
-  --cta-foreground: #ffffff;
+  --cta: #FACC15; /* Yellow CTA */
+  --cta-foreground: #000000;
 
   --border: #e5e5e5;
-  /* Neutral-200 */
+  
+  --font-sans: var(--font-ibm-plex-sans);
 }
 
 body {

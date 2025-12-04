@@ -2,6 +2,8 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import ProductCard from "./components/ProductCard";
 import Footer from "./components/Footer";
+import EditorialSection from "./components/EditorialSection";
+import GallerySection from "./components/GallerySection";
 import { getProducts } from "./actions";
 
 export const dynamic = 'force-dynamic';
@@ -30,6 +32,8 @@ export default async function Home() {
     <main className="min-h-screen flex flex-col">
       <Header />
       <Hero />
+      <EditorialSection />
+      <GallerySection />
 
       <section className="py-24 container mx-auto px-6">
         <div className="flex items-end justify-between mb-12">
