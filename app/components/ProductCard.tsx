@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ShoppingBag, Eye } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import WishlistButton from './WishlistButton';
 
 interface ProductCardProps {
     _id: string;
@@ -47,6 +48,9 @@ export default function ProductCard({ _id, name, price, images, category }: Prod
                         <button className="p-3 bg-white text-black rounded-full hover:bg-[var(--primary)] hover:text-white transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75">
                             <Eye size={20} />
                         </button>
+                        <div className="transform translate-y-4 group-hover:translate-y-0 duration-300 delay-100">
+                            <WishlistButton productId={_id} className="bg-white text-black hover:bg-[var(--primary)] hover:text-white p-3" />
+                        </div>
                     </div>
                 </div>
 

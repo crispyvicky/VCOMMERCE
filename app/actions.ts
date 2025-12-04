@@ -13,10 +13,21 @@ export async function getProducts(filters: {
     sort?: string;
     limit?: number;
     isFeatured?: boolean;
+    search?: string;
 } = {}) {
     await dbConnect();
 
     const query: any = {};
+
+    if (filters.search) {
+        const searchRegex = new RegExp(filters.search, 'i');
+        query.$or = [
+            { name: searchRegex },
+            { description: searchRegex },
+            { category: searchRegex },
+            { 'colors': searchRegex }
+        ];
+    }
 
     if (filters.category && filters.category !== 'All') {
         query.category = filters.category;
@@ -240,5 +251,181 @@ export async function updateProduct(productId: string, productData: any) {
     } catch (error) {
         console.error('Error updating product:', error);
         return { success: false, error: 'Failed to update product' };
+    }
+}
+
+import Review from '@/models/Review';
+
+export async function addReview(productId: string, rating: number, comment: string, userEmail: string) {
+    await dbConnect();
+
+    try {
+        const user = await User.findOne({ email: userEmail });
+        if (!user) return { success: false, error: 'User not found' };
+
+        await Review.create({
+            user: user._id,
+            product: productId,
+            rating,
+            comment,
+        });
+
+        revalidatePath(`/product/${productId}`);
+        return { success: true };
+    } catch (error: any) {
+        if (error.code === 11000) {
+            return { success: false, error: 'You have already reviewed this product' };
+        }
+        console.error('Error adding review:', error);
+        return { success: false, error: 'Failed to add review' };
+    }
+}
+
+export async function getProductReviews(productId: string) {
+    await dbConnect();
+    const reviews = await Review.find({ product: productId })
+        .populate('user', 'name')
+        .sort({ createdAt: -1 })
+        .lean();
+
+    return reviews.map((review: any) => ({
+        _id: review._id.toString(),
+        user: review.user?.name || 'Anonymous',
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt?.toISOString(),
+    }));
+}
+
+export async function toggleWishlist(productId: string, userEmail: string) {
+    await dbConnect();
+    try {
+        const user = await User.findOne({ email: userEmail });
+        if (!user) return { success: false, error: 'User not found' };
+
+        const index = user.wishlist.indexOf(productId);
+        if (index === -1) {
+            user.wishlist.push(productId);
+        } else {
+            user.wishlist.splice(index, 1);
+        }
+
+        await user.save();
+        revalidatePath('/wishlist');
+        revalidatePath(`/product/${productId}`);
+        return { success: true, isInWishlist: index === -1 };
+    } catch (error) {
+        console.error('Error toggling wishlist:', error);
+        return { success: false, error: 'Failed to update wishlist' };
+    }
+}
+
+export async function getWishlist(userEmail: string) {
+    await dbConnect();
+    const user = await User.findOne({ email: userEmail }).populate('wishlist').lean();
+    if (!user) return [];
+
+    return user.wishlist.map((product: any) => ({
+        _id: product._id.toString(),
+        name: product.name,
+        price: product.price,
+        images: product.images,
+        category: product.category,
+        inStock: product.inStock,
+    }));
+}
+
+export async function getRelatedProducts(productId: string, category: string) {
+    await dbConnect();
+    const products = await Product.find({
+        category,
+        _id: { $ne: productId }
+    })
+        .limit(4)
+        .lean();
+
+    return products.map((product: any) => ({
+        _id: product._id.toString(),
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        category: product.category,
+        images: product.images,
+        sizes: product.sizes,
+        colors: product.colors,
+        inStock: product.inStock,
+        isFeatured: product.isFeatured,
+    }));
+}
+
+import Coupon from '@/models/Coupon';
+
+export async function createCoupon(couponData: any) {
+    await dbConnect();
+    try {
+        await Coupon.create(couponData);
+        revalidatePath('/admin/coupons');
+        return { success: true };
+    } catch (error) {
+        console.error('Error creating coupon:', error);
+        return { success: false, error: 'Failed to create coupon' };
+    }
+}
+
+export async function getCoupons() {
+    await dbConnect();
+    const coupons = await Coupon.find({}).sort({ createdAt: -1 }).lean();
+    return coupons.map((coupon: any) => ({
+        _id: coupon._id.toString(),
+        code: coupon.code,
+        discountType: coupon.discountType,
+        value: coupon.value,
+        expiryDate: coupon.expiryDate?.toISOString(),
+        usageLimit: coupon.usageLimit,
+        usedCount: coupon.usedCount,
+        isActive: coupon.isActive,
+    }));
+}
+
+export async function deleteCoupon(id: string) {
+    await dbConnect();
+    try {
+        await Coupon.findByIdAndDelete(id);
+        revalidatePath('/admin/coupons');
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting coupon:', error);
+        return { success: false, error: 'Failed to delete coupon' };
+    }
+}
+
+export async function validateCoupon(code: string) {
+    await dbConnect();
+    try {
+        const coupon = await Coupon.findOne({ code: code.toUpperCase(), isActive: true });
+
+        if (!coupon) {
+            return { success: false, error: 'Invalid coupon code' };
+        }
+
+        if (new Date() > new Date(coupon.expiryDate)) {
+            return { success: false, error: 'Coupon has expired' };
+        }
+
+        if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
+            return { success: false, error: 'Coupon usage limit reached' };
+        }
+
+        return {
+            success: true,
+            coupon: {
+                code: coupon.code,
+                discountType: coupon.discountType,
+                value: coupon.value,
+            }
+        };
+    } catch (error) {
+        console.error('Error validating coupon:', error);
+        return { success: false, error: 'Failed to validate coupon' };
     }
 }

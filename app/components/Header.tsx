@@ -12,6 +12,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { items, toggleCart } = useCart();
   const { data: session } = useSession();
 
@@ -48,9 +49,39 @@ export default function Header() {
         </nav>
 
         <div className="hidden md:flex items-center space-x-6">
-          <button className="hover:text-[var(--primary)] transition-colors">
-            <Search size={20} />
-          </button>
+          {/* Search Bar */}
+          <div className="relative flex items-center">
+            <AnimatePresence>
+              {isSearchOpen ? (
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 200, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  className="overflow-hidden mr-2"
+                >
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="w-full bg-transparent border-b border-gray-300 focus:border-[var(--primary)] outline-none px-2 py-1 text-sm"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        window.location.href = `/search?q=${(e.target as HTMLInputElement).value}`;
+                        setIsSearchOpen(false);
+                      }
+                    }}
+                    onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
+                  />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="hover:text-[var(--primary)] transition-colors"
+            >
+              <Search size={20} />
+            </button>
+          </div>
 
           {/* Auth Menu */}
           {session ? (
@@ -77,6 +108,13 @@ export default function Header() {
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       My Orders
+                    </Link>
+                    <Link
+                      href="/wishlist"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[var(--primary)]"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      My Wishlist
                     </Link>
                     {/* Admin Link if role is admin */}
                     {(session.user as any).role === 'admin' && (

@@ -21,6 +21,9 @@ interface CartContextType {
     cartTotal: number;
     isCartOpen: boolean;
     toggleCart: () => void;
+    discount: { code: string; type: 'percentage' | 'fixed'; value: number } | null;
+    applyCoupon: (code: string, type: 'percentage' | 'fixed', value: number) => void;
+    removeCoupon: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -29,6 +32,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [discount, setDiscount] = useState<{ code: string; type: 'percentage' | 'fixed'; value: number } | null>(null);
 
     // Load from localStorage on mount
     useEffect(() => {
@@ -82,11 +86,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
         );
     };
 
-    const clearCart = () => setItems([]);
+    const clearCart = () => {
+        setItems([]);
+        setDiscount(null);
+    };
 
     const toggleCart = () => setIsCartOpen((prev) => !prev);
 
-    const cartTotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+    const applyCoupon = (code: string, type: 'percentage' | 'fixed', value: number) => {
+        setDiscount({ code, type, value });
+    };
+
+    const removeCoupon = () => {
+        setDiscount(null);
+    };
+
+    const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+
+    let cartTotal = subtotal;
+    if (discount) {
+        if (discount.type === 'percentage') {
+            cartTotal = subtotal - (subtotal * discount.value) / 100;
+        } else {
+            cartTotal = Math.max(0, subtotal - discount.value);
+        }
+    }
 
     return (
         <CartContext.Provider
@@ -99,6 +123,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 cartTotal,
                 isCartOpen,
                 toggleCart,
+                discount,
+                applyCoupon,
+                removeCoupon,
             }}
         >
             {children}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { Star, Truck, ShieldCheck, RefreshCw } from 'lucide-react';
 import Image from 'next/image';
+import WishlistButton from './WishlistButton';
 
 interface ProductDetailsProps {
     product: any;
@@ -100,8 +101,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                             key={size}
                                             onClick={() => setSelectedSize(size)}
                                             className={`w-12 h-12 rounded-full border flex items-center justify-center transition-colors ${selectedSize === size
-                                                    ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
-                                                    : 'border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)]'
+                                                ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
+                                                : 'border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)]'
                                                 }`}
                                         >
                                             {size}
@@ -120,8 +121,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                             key={color}
                                             onClick={() => setSelectedColor(color)}
                                             className={`px-4 py-2 rounded-full border transition-colors ${selectedColor === color
-                                                    ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
-                                                    : 'border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)]'
+                                                ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
+                                                : 'border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)]'
                                                 }`}
                                         >
                                             {color}
@@ -140,9 +141,9 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                         >
                             Add to Cart
                         </button>
-                        <button className="w-14 h-14 border border-[var(--border)] rounded-full flex items-center justify-center hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors">
-                            <ShieldCheck size={24} />
-                        </button>
+                        <div className="w-14 h-14 border border-[var(--border)] rounded-full flex items-center justify-center hover:border-[var(--primary)] transition-colors">
+                            <WishlistButton productId={product._id} className="w-full h-full flex items-center justify-center" />
+                        </div>
                     </div>
 
                     {/* Features */}

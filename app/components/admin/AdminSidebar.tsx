@@ -10,7 +10,8 @@ import {
     Settings,
     LogOut,
     Menu,
-    X
+    X,
+    Tag
 } from 'lucide-react';
 import { useState } from 'react';
 import clsx from 'clsx';
@@ -20,6 +21,7 @@ const navItems = [
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Customers', href: '/admin/customers', icon: Users },
+    { name: 'Coupons', href: '/admin/coupons', icon: Tag },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
