@@ -1,9 +1,9 @@
-'use client';
+
 
 import { DollarSign, ShoppingBag, Users, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import clsx from 'clsx';
 import SalesChart from '@/app/components/admin/SalesChart';
-import { getDashboardStats } from '@/app/actions';
+import { getDashboardStats } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
 

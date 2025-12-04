@@ -4,6 +4,8 @@ import ProductCard from "./components/ProductCard";
 import Footer from "./components/Footer";
 import { getProducts } from "./actions";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   // Fetch featured products from MongoDB
   const featuredProducts = await getProducts({ limit: 4, isFeatured: true });
